@@ -7,5 +7,7 @@ router.post("/login", adminController.adminLogin);
 
 // ✅ User creation route
 router.post("/create-user", adminController.userCreation);
+router.get("/user-display", adminController.userDisplay);
+
 
 module.exports = router;
