@@ -1,69 +1,55 @@
-const User = require('../models/userModel');
+const UserModel = require('../models/userModel');
+const bcrypt = require('bcryptjs');
 
-// Get all users
-const getAllUsers = async (req, res) => {
+const userLogin = async (req, res) => {
     try {
-        const users = await User.find();
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
+        const { email, userid, password } = req.body;
 
-// Get a single user by ID
-const getUserById = async (req, res) => {
-    try {
-        const user = await User.findById(req.params.id);
+        // Log the request body for debugging purposes
+        console.log("User login data:", req.body);
+
+        // Check if either email or userid is provided
+        if (!email && !userid) {
+            return res.status(400).json({ msg: "Please provide either email or user ID" });
+        }
+
+        // Find user by email or userid
+        let user;
+        if (email) {
+            user = await UserModel.findOne({ email });
+        } else if (userid) {
+            user = await UserModel.findOne({ userid });
+        }
+
+        // If user not found
         if (!user) {
-            return res.status(404).json({ message: 'User not found' });
+            return res.status(404).json({ msg: "User not found" });
         }
-        res.status(200).json(user);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
 
-// Create a new user
-const createUser = async (req, res) => {
-    try {
-        const newUser = new User(req.body);
-        const savedUser = await newUser.save();
-        res.status(201).json(savedUser);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
-
-// Update a user by ID
-const updateUser = async (req, res) => {
-    try {
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!updatedUser) {
-            return res.status(404).json({ message: 'User not found' });
+        // Compare the provided password with the stored hashed password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ msg: "Invalid credentials" });
         }
-        res.status(200).json(updatedUser);
-    } catch (error) {
-        res.status(400).json({ message: error.message });
-    }
-};
 
-// Delete a user by ID
-const deleteUser = async (req, res) => {
-    try {
-        const deletedUser = await User.findByIdAndDelete(req.params.id);
-        if (!deletedUser) {
-            return res.status(404).json({ message: 'User not found' });
-        }
-        res.status(200).json({ message: 'User deleted successfully' });
+        // You can generate a JWT token here if you are using authentication tokens
+        // const token = user.generateAuthToken(); // Assuming you have a method to generate a token
+
+        return res.status(200).json({
+            msg: "Login successful",
+            user: {
+                name: user.name,
+                email: user.email,
+                userid: user.userid,
+                // token, // Include the token if needed
+            },
+        });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        console.error("Login error:", error);
+        return res.status(500).json({ msg: "Something went wrong", error: error.message });
     }
-};
+}
 
 module.exports = {
-    getAllUsers,
-    getUserById,
-    createUser,
-    updateUser,
-    deleteUser
+    userLogin,
 };
