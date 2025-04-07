@@ -4,7 +4,7 @@ const passGen = require("../middlewares/passwordGenerator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const transporter = require("../utils/emailTransporter"); // ✅ Importing the transporter
-
+require("dotenv").config();
 // ✅ Admin login controller with JWT and bcrypt
 const adminLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -69,7 +69,7 @@ const userCreation = async (req, res) => {
 
     // Prepare email
     const mailOptions = {
-      from: "shahwalcomputer18@gmail.com",
+      from: process.env.EMAIL_HOST,
       to: email,
       subject: "Your Company Work Detail Account",
       text:
