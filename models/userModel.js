@@ -3,13 +3,23 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    default: ""
+    required: true,
+    trim: true
   },
   email: {
     type: String,
-    default: ""
+    required: true,
+    unique: true,
+    trim: true,
+    lowercase: true
   },
   userid: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  },
+  department: {
     type: String,
     default: ""
   },
@@ -17,14 +27,24 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: ""
   },
+  phone: {
+    type: Number,
+    default: ""
+  },
   password: {
     type: String,
     default: ""
   },
+  tasks: {
+    type: Number,
+    default: 0
+  },
   image: {
     type: String,
-    default: "" // You can also default to a placeholder path if needed
+    default: "https://via.placeholder.com/150"
   }
+}, {
+  timestamps: true
 });
 
 const userModel = mongoose.model("User", userSchema);
